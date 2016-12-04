@@ -2,32 +2,41 @@
 #include <SFML/Graphics.hpp>
 #include "Map.h"
 #include <iostream>
+#include "Moving.h"
+#include "Agent.h"
 
 const float screenWidth = 1050.0f;
 const float screenHeight = 1200.0f;
 sf::RenderWindow *window;
-
+	
 std::vector<Renderable*> toRender;
 std::vector<Interactive*> toInteract;
+std::vector<Moving*> toMove;
 
 int main()
 {
 	window = new sf::RenderWindow(sf::VideoMode(static_cast<unsigned int>(screenWidth), static_cast<unsigned int>(screenHeight)), "Pathfinding");
 	window->setVerticalSyncEnabled(true);
 
-	Map* terrain = new Map(screenWidth, screenHeight, "./Assets/terrain.png");
-	toRender.push_back(terrain);
-	toInteract.push_back(terrain);
+	Map* map = new Map(screenWidth, screenHeight, "./Assets/terrain23.png");
+	toRender.push_back(map);
+	toInteract.push_back(map);
 
-	sf::Clock clock;
-	float lastTime = 0; 
-	float fps = 0.0f;
+	Agent* player = new Agent("./Assets/panda.png", sf::Vector2i(0, 0), map);
+	toRender.push_back(player);
+	toMove.push_back(player);
+
+	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(2, 2), map);
+	toRender.push_back(enemy);
+	toMove.push_back(enemy);
+
+	sf::Clock fpsClock, moveClock;
+	float totalMoveTime = 0;
 
 	while (window->isOpen())
 	{
-		float currentTime = clock.restart().asSeconds();
-		fps = 1.0 / (currentTime);
-		lastTime = currentTime;
+		float currentFpsTime = fpsClock.restart().asSeconds();
+		float fps = 1.0f / (currentFpsTime);
 		window->setTitle("Pathfinding (" + std::to_string(fps) + ")");
 
 		sf::Event event;
@@ -61,6 +70,16 @@ int main()
 				}
 			}
 
+		}
+
+		totalMoveTime += moveClock.restart().asSeconds();
+		if(totalMoveTime > 1.0f)
+		{
+			for(auto m : toMove)
+			{
+				m->Move();
+			}
+			totalMoveTime = 0.0f;
 		}
 
 		window->clear();

@@ -63,6 +63,21 @@ void Map::HandleMouse(sf::Mouse::Button mb, sf::Vector2f& mousePosition)
 
 }
 
+float Map::GetHexSize() const
+{
+	return hexsize * 2.0f;
+}
+
+sf::Vector2f Map::GetPositionByIndex(int x, int y)
+{
+	return shapes[x][y]->getPosition();
+}
+
+sf::Vector2f Map::GetPositionByIndex(sf::Vector2i posIndex)
+{
+	return shapes[posIndex.x][posIndex.y]->getPosition();
+}
+
 float Map::distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2)
 {
 	return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
@@ -96,54 +111,6 @@ void Map::LoadMapFromImage(float screenWidth, float screenHeight, const std::str
 
 }
 
-//void Map::GenerateFromNumbers(float width, float height, float hexSize)
-//{
-//	Hexagon sizes(hexSize);
-//	float outlineThickness = 4.0f;
-//
-//	columns = static_cast<int>(width / ((sizes.width() + outlineThickness) * (3.0f / 4.0f)));
-//	rows = static_cast<int>(height / (sizes.height() + outlineThickness)) - 1;
-//
-//	float initialOffsetX = (sizes.width() + outlineThickness) * (3.0f/4.0f) ;
-//	float initialOffsetY = (sizes.height() + outlineThickness) * 1.3f;
-//	float offsetX = initialOffsetX;
-//	float offsetY = initialOffsetY;
-//	
-//	for(int i = 0; i < rows; ++i)
-//	{
-//		std::vector<Hexagon*> line;
-//		for(int j = 0; j < columns; ++j)
-//		{
-//			Hexagon* tmp = new Hexagon(hexSize);
-//			tmp->setOutlineColor(sf::Color::Blue);
-//			tmp->setOutlineThickness(outlineThickness);
-//			tmp->setPosition(offsetX, offsetY);
-//			tmp->setFillColor(sf::Color::Green);
-//
-//			line.push_back(tmp);
-//
-//			offsetX += sizes.width() * 3.0f/4.0f + outlineThickness/2.0f; 
-//			
-//			if (j % 2 == 0)
-//			{
-//				offsetY -= sizes.height() / 2.0f + outlineThickness / 2.0f;
-//			}
-//			else
-//			{
-//				offsetY += sizes.height() / 2.0f + outlineThickness / 2.0f;
-//			}
-//		}
-//		
-//		shapes.push_back(line);
-//		
-//		offsetX = initialOffsetX;
-//		offsetY = initialOffsetY + (i+1) * (sizes.height() + outlineThickness);
-//
-//	}
-//
-//
-//}
-
 void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage)
 {
 	int imageWidth = mapImage.getSize().x;
@@ -159,7 +126,9 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 	 hexWidth =  (screenWidth / columns) * 3.0f/4.0f * 0.83f;
 	 hexHeight = screenHeight / rows * 0.53f;
 
-	Hexagon sizes(hexWidth < hexHeight ? hexWidth : hexHeight);
+	 hexsize = hexWidth < hexHeight ? hexWidth : hexHeight;
+
+	Hexagon sizes(hexsize);
 
 	float initialOffsetX = (sizes.width() + outlineThickness) * (3.0f / 4.0f);
 	float initialOffsetY = (sizes.height() + outlineThickness) * 1.3f;

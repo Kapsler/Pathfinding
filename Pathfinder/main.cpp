@@ -36,8 +36,6 @@ int main()
 	while (window->isOpen())
 	{
 		float currentFpsTime = fpsClock.restart().asSeconds();
-		float fps = 1.0f / (currentFpsTime);
-		window->setTitle("Pathfinding (" + std::to_string(fps) + ")");
 
 		sf::Event event;
 		while (window->pollEvent(event))
@@ -73,8 +71,12 @@ int main()
 		}
 
 		totalMoveTime += moveClock.restart().asSeconds();
+
 		if(totalMoveTime > 1.0f)
 		{
+			float fps = 1.0f / (currentFpsTime);
+			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");
+
 			for(auto m : toMove)
 			{
 				m->Move();

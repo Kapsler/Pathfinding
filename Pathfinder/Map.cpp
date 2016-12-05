@@ -1,8 +1,7 @@
 #include "Map.h"
 #include <deque>
-#include <iostream>
-#include <algorithm>
 #include <unordered_map>
+#include <memory>
 
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
@@ -67,7 +66,7 @@ void Map::DebugRender(sf::RenderWindow* window)
 		for (auto hexdat : debugPath)
 		{
 			drawSelected = *hexdat->hex;
-			drawSelected.setFillColor(sf::Color::Blue);
+			drawSelected.setFillColor(sf::Color(255,0,255,255));
 			window->draw(drawSelected);
 		}
 	}
@@ -118,40 +117,43 @@ std::vector<HexData*> Map::GetNeighbors(HexData* current, std::vector<std::vecto
 
 std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap)
 {
-	//std::cout << "Searching Path!" << std::endl;
 	//Breadth Search
-	std::vector<HexData*> foundPath, finished;
-	std::deque<HexData*> toDo;
 	std::unordered_map<HexData*, HexData*> cameFrom;
+	std::unordered_map<HexData*, int> costsSoFar;
+	std::map<float, HexData*> priorityToDo;
 
-	toDo.push_back(start);
+	priorityToDo.insert_or_assign(0.0f, start);
 	cameFrom.insert_or_assign(start, nullptr);
+	costsSoFar.insert_or_assign(start, 0);
 
 	HexData* currentHex;
 
-	while (!toDo.empty())
+	while (!priorityToDo.empty())
 	{
-		currentHex = *toDo.begin();
-		toDo.pop_front();
-
+	currentHex = priorityToDo.begin()->second;
+	priorityToDo.erase(priorityToDo.begin()->first);
+	
 		if(currentHex == target)
 		{
 			break;
 		}
-
+	
 		for (HexData* neighbor : GetNeighbors(currentHex, usedMap))
 		{
-			if (cameFrom.find(neighbor) != cameFrom.end())
+			int newCosts = costsSoFar[currentHex] + GetDifficulty(neighbor);
+
+			if (costsSoFar.find(neighbor) == costsSoFar.end() || newCosts < costsSoFar.at(neighbor))
 			{
-			}
-			else
-			{
-				toDo.push_back(neighbor);
+				costsSoFar.insert_or_assign(neighbor, newCosts);
+				float priority = newCosts + distanceBetweenFloatPoints(target->hex->getPosition(), neighbor->hex->getPosition());
+				priorityToDo.insert_or_assign(priority, neighbor);
 				cameFrom.insert_or_assign(neighbor, currentHex);
 			}
 		}
 	}
 
+	//Build Path
+	std::vector<HexData*> foundPath;
 	currentHex = target;
 	foundPath.push_back(currentHex);
 
@@ -160,6 +162,16 @@ std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vecto
 		currentHex = cameFrom.at(currentHex);
 		foundPath.push_back(currentHex);
 	}
+
+	//Adds all tested nodes to path
+	//for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
+	//{
+	//	if(it->second != nullptr)
+	//	{
+	//		foundPath.push_back(it->second);
+	//	}
+	//		
+	//}
 
 	//std::cout << "Found Path! Size: " << foundPath.size() << std::endl;
 	return foundPath;
@@ -175,10 +187,6 @@ int Map::GetDifficulty(HexData* HexToTest)
 	return HexToTest->terrain;
 }
 
-bool Map::lowerCost(HexData *h1, HexData *h2)
-{
-	return h1->terrain < h2->terrain;
-}
 
 void Map::HandleKeyboard(sf::Keyboard::Key key)
 {
@@ -228,7 +236,7 @@ sf::Vector2f Map::GetPositionByIndex(sf::Vector2i posIndex)
 
 float Map::distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2)
 {
-	return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+	return std::abs(p1.x - p2.x) + std::abs(p1.y - p2.y);
 }
 
 void Map::SetCurrentHex(const sf::Vector2f& mousePos)

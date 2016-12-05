@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "HexData.h"
-#include "Hexagon.h"
 #include "Renderable.h"
 #include "Interactive.h"
 #include <deque>
@@ -35,7 +34,6 @@ private:
 	static std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 	static int GetDifficulty(HexData* HexToTest);
 
-	static bool lowerCost(HexData *h1, HexData *h2);
 	std::vector<std::vector<HexData*>> hexMap;
 	HexData* selectedHexDat = nullptr;
 	

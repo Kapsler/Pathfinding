@@ -26,7 +26,8 @@ private:
 	void SetCurrentHex(const sf::Vector2f& mousePos);
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
 	void DebugRenderText(sf::RenderWindow *window);
-	
+	std::vector<HexData*> GetNeighbors(HexData* current);
+
 	std::vector<std::vector<HexData*>> shapes;
 	HexData* selectedHexDat = nullptr;
 	
@@ -48,4 +49,6 @@ private:
 	int streetDifficulty = 1;
 	int notfoundDifficulty = 1000;
 
+	sf::Text debugText;
+	sf::Font debugFont;
 };

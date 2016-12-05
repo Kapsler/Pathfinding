@@ -3,6 +3,13 @@
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
 	LoadMapFromImage(screenWidth, screenHeight, filename);
+
+	debugFont.loadFromFile("./Assets/arial.ttf");
+	debugText.setFont(debugFont);
+	debugText.setCharacterSize(18);
+	debugText.setFillColor(sf::Color::White);
+	debugText.setOutlineThickness(2);
+	debugText.setOutlineColor(sf::Color::Black);
 }
 
 Map::~Map()
@@ -37,59 +44,63 @@ void Map::Render(sf::RenderWindow* window)
 
 void Map::DebugRender(sf::RenderWindow* window)
 {
-
 	if (selectedHexDat != nullptr)
 	{
-		sf::Vector2i evenOffsets[6] = {sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(+1,-1), sf::Vector2i(+1, +1)};
-		sf::Vector2i oddOffsets[6] = {sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(-1,+1), sf::Vector2i(-1, -1)};
-
 		Hexagon drawSelected;
-		sf::Vector2i* offsets = selectedHexDat->index.y % 2 == 0 ? evenOffsets : oddOffsets;
-
-		for(auto i = 0; i < 6; ++i)
+		
+		for(auto hexdat : GetNeighbors(selectedHexDat))
 		{
-			int xindex = selectedHexDat->index.x + offsets[i].x;
-			int yindex = selectedHexDat->index.y + offsets[i].y;
-
-			if(xindex >= 0 && xindex < rows && yindex >= 0 && yindex < columns)
-			{
-				drawSelected = *shapes[xindex][yindex]->hex;
-				drawSelected.setOutlineColor(sf::Color::Cyan);
-				window->draw(drawSelected);
-			}
+			drawSelected = *hexdat->hex;
+			drawSelected.setOutlineColor(sf::Color::Cyan);
+			window->draw(drawSelected);
 		}
 
 		drawSelected = *selectedHexDat->hex;
 		drawSelected.setOutlineColor(sf::Color::Red);
 		window->draw(drawSelected);
-		
 	}
 
-	DebugRenderText(window);
+	//DebugRenderText(window);
 }
 
 void Map::DebugRenderText(sf::RenderWindow* window)
 {
 	//DebugText - Render Indices on Hexes
-	sf::Text text;
-	sf::Font t;
-	t.loadFromFile("./Assets/arial.ttf");
-	text.setFont(t);
-	text.setCharacterSize(18);
-	text.setFillColor(sf::Color::White);
-	text.setOutlineThickness(2);
-	text.setOutlineColor(sf::Color::Black);
 
 	for (const auto line : shapes)
 	{
 		for (const auto hexdat : line)
 		{
-			text.setPosition(hexdat->hex->getPosition());
-			text.setString(std::to_string(hexdat->index.x) + "," + std::to_string(hexdat->index.y));
-			text.setOrigin(text.getGlobalBounds().width / 2.0f, text.getGlobalBounds().height / 2.0f);
-			window->draw(text);
+			debugText.setPosition(hexdat->hex->getPosition());
+			debugText.setString(std::to_string(hexdat->index.x) + "," + std::to_string(hexdat->index.y));
+			debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
+			window->draw(debugText);
 		}
 	}
+}
+
+std::vector<HexData*> Map::GetNeighbors(HexData* current)
+{
+	std::vector<HexData*> neighbors;
+
+	sf::Vector2i evenOffsets[6] = { sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(+1,-1), sf::Vector2i(+1, +1) };
+	sf::Vector2i oddOffsets[6] = { sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(-1,+1), sf::Vector2i(-1, -1) };
+
+	Hexagon drawSelected;
+	sf::Vector2i* offsets = current->index.y % 2 == 0 ? evenOffsets : oddOffsets;
+
+	for (auto i = 0; i < 6; ++i)
+	{
+		auto xindex = current->index.x + offsets[i].x;
+		auto yindex = current->index.y + offsets[i].y;
+
+		if (xindex >= 0 && xindex < rows && yindex >= 0 && yindex < columns)
+		{
+			neighbors.push_back(shapes[xindex][yindex]);
+		}
+	}
+
+	return neighbors;
 }
 
 void Map::HandleKeyboard(sf::Keyboard::Key key)

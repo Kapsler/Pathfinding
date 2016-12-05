@@ -22,13 +22,13 @@ int main()
 	toRender.push_back(map);
 	toInteract.push_back(map);
 
-	Agent* player = new Agent("./Assets/panda.png", sf::Vector2i(0, 0), map);
+	/*Agent* player = new Agent("./Assets/panda.png", sf::Vector2i(0, 0), map);
 	toRender.push_back(player);
 	toMove.push_back(player);
 
 	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(2, 2), map);
 	toRender.push_back(enemy);
-	toMove.push_back(enemy);
+	toMove.push_back(enemy);*/
 
 	sf::Clock fpsClock, moveClock;
 	float totalMoveTime = 0;
@@ -89,6 +89,7 @@ int main()
 		for(const auto r : toRender)
 		{
 			r->Render(window);
+			r->DebugRender(window);
 		}
 
 		window->display();

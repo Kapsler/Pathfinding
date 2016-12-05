@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "HexData.h"
 #include "Hexagon.h"
 #include "Renderable.h"
 #include "Interactive.h"
@@ -24,11 +25,10 @@ private:
 	static float distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2);
 	void SetCurrentHex(const sf::Vector2f& mousePos);
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
+	void DebugRenderText(sf::RenderWindow *window);
 	
-
-	std::vector<std::vector<int>> terrain;
-	std::vector<std::vector<Hexagon*>> shapes;
-	Hexagon* selectedHex = nullptr;
+	std::vector<std::vector<HexData*>> shapes;
+	HexData* selectedHexDat = nullptr;
 	
 	int rows, columns;
 	float hexsize;
@@ -40,6 +40,7 @@ private:
 	sf::Color street = sf::Color(130, 130, 130);
 	sf::Color notfoundColor = sf::Color::Magenta;
 
+	int unpassable = 100;
 	int waterDifficulty = 1000;
 	int sandDifficulty = 5;
 	int mudDifficulty = 3;

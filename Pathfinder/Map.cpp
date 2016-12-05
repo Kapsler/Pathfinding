@@ -1,13 +1,4 @@
 #include "Map.h"
-#include <allocators>
-#include <valarray>
-#include <iostream>
-
-//Map::Map(float mapWidth, float mapHeight, float hexSize)
-//{
-//	selectedHex = nullptr;
-//	GenerateFromNumbers(mapWidth, mapHeight, hexSize);
-//}
 
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
@@ -27,27 +18,78 @@ Map::~Map()
 
 void Map::Render(sf::RenderWindow* window)
 {
+	
 	for(const auto line : shapes)
 	{
-		for(const auto hex : line)
+		for(const auto hexdat : line)
 		{
-			window->draw(*hex);
+			window->draw(*(hexdat->hex));
 		}
 	}
 
-	if (selectedHex != nullptr)
+	if (selectedHexDat != nullptr)
 	{
-		Hexagon drawSelected = *selectedHex;
+		Hexagon drawSelected = *selectedHexDat->hex;
 		drawSelected.setOutlineColor(sf::Color::Red);
 		window->draw(drawSelected);
 	}
-	
-	
 }
 
 void Map::DebugRender(sf::RenderWindow* window)
 {
 
+	if (selectedHexDat != nullptr)
+	{
+		sf::Vector2i evenOffsets[6] = {sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(+1,-1), sf::Vector2i(+1, +1)};
+		sf::Vector2i oddOffsets[6] = {sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(-1,+1), sf::Vector2i(-1, -1)};
+
+		Hexagon drawSelected;
+		sf::Vector2i* offsets = selectedHexDat->index.y % 2 == 0 ? evenOffsets : oddOffsets;
+
+		for(auto i = 0; i < 6; ++i)
+		{
+			int xindex = selectedHexDat->index.x + offsets[i].x;
+			int yindex = selectedHexDat->index.y + offsets[i].y;
+
+			if(xindex >= 0 && xindex < rows && yindex >= 0 && yindex < columns)
+			{
+				drawSelected = *shapes[xindex][yindex]->hex;
+				drawSelected.setOutlineColor(sf::Color::Cyan);
+				window->draw(drawSelected);
+			}
+		}
+
+		drawSelected = *selectedHexDat->hex;
+		drawSelected.setOutlineColor(sf::Color::Red);
+		window->draw(drawSelected);
+		
+	}
+
+	DebugRenderText(window);
+}
+
+void Map::DebugRenderText(sf::RenderWindow* window)
+{
+	//DebugText - Render Indices on Hexes
+	sf::Text text;
+	sf::Font t;
+	t.loadFromFile("./Assets/arial.ttf");
+	text.setFont(t);
+	text.setCharacterSize(18);
+	text.setFillColor(sf::Color::White);
+	text.setOutlineThickness(2);
+	text.setOutlineColor(sf::Color::Black);
+
+	for (const auto line : shapes)
+	{
+		for (const auto hexdat : line)
+		{
+			text.setPosition(hexdat->hex->getPosition());
+			text.setString(std::to_string(hexdat->index.x) + "," + std::to_string(hexdat->index.y));
+			text.setOrigin(text.getGlobalBounds().width / 2.0f, text.getGlobalBounds().height / 2.0f);
+			window->draw(text);
+		}
+	}
 }
 
 void Map::HandleKeyboard(sf::Keyboard::Key key)
@@ -70,12 +112,12 @@ float Map::GetHexSize() const
 
 sf::Vector2f Map::GetPositionByIndex(int x, int y)
 {
-	return shapes[x][y]->getPosition();
+	return shapes[x][y]->hex->getPosition();
 }
 
 sf::Vector2f Map::GetPositionByIndex(sf::Vector2i posIndex)
 {
-	return shapes[posIndex.x][posIndex.y]->getPosition();
+	return shapes[posIndex.x][posIndex.y]->hex->getPosition();
 }
 
 float Map::distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2)
@@ -90,13 +132,13 @@ void Map::SetCurrentHex(const sf::Vector2f& mousePos)
 
 	for (const auto line : shapes)
 	{
-		for (const auto hex : line)
+		for (const auto hexdat : line)
 		{
-			dist = distanceBetweenFloatPoints(mousePos, hex->getPosition());
+			dist = distanceBetweenFloatPoints(mousePos, hexdat->hex->getPosition());
 			if (dist < closestDist)
 			{
 				closestDist = dist;
-				selectedHex = hex;
+				selectedHexDat = hexdat;
 			}
 		}
 	}
@@ -108,7 +150,6 @@ void Map::LoadMapFromImage(float screenWidth, float screenHeight, const std::str
 	mapImage.loadFromFile(filename);
 
 	GenerateFromImage(screenWidth, screenHeight, mapImage);
-
 }
 
 void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage)
@@ -120,13 +161,10 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 	rows = imageHeight;
 	float outlineThickness = 2.0f;
 
-	float hexWidth = ((3 * screenWidth) / (4 * columns) - outlineThickness) * 0.9f ;
-	float hexHeight = ((screenHeight / (rows)) - outlineThickness) * 0.9f;
+	float hexWidth = (screenWidth / columns) * 3.0f/4.0f * 0.83f;
+	float hexHeight = ((screenHeight) / rows) * 0.53f;
 
-	 hexWidth =  (screenWidth / columns) * 3.0f/4.0f * 0.83f;
-	 hexHeight = screenHeight / rows * 0.53f;
-
-	 hexsize = hexWidth < hexHeight ? hexWidth : hexHeight;
+	hexsize = hexWidth < hexHeight ? hexWidth : hexHeight;
 
 	Hexagon sizes(hexsize);
 
@@ -136,15 +174,14 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 	float offsetY = initialOffsetY;
 
 	shapes.resize(rows);
-	terrain.resize(rows);
 
 	for (int i = 0; i < rows; ++i)
 	{
 		shapes[i].resize(columns);
-		terrain[i].resize(columns);
 
 		for (int j = 0; j < columns; ++j)
 		{
+			HexData *hexDatTmp = new HexData();
 
 			Hexagon* tmp = new Hexagon(sizes);
 			tmp->setOutlineColor(sf::Color::Blue);
@@ -155,31 +192,34 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 
 			if(currentColor == water)
 			{
-				terrain[i][j] = waterDifficulty;
+				 hexDatTmp->terrain = waterDifficulty;
 				tmp->setFillColor(water);
 			} else if(currentColor == sand)
 			{
-				terrain[i][j] = sandDifficulty;
+				hexDatTmp->terrain = sandDifficulty;
 				tmp->setFillColor(sand);
 			} else if(currentColor == mud)
 			{
-				terrain[i][j] = mudDifficulty;
+				hexDatTmp->terrain = mudDifficulty;
 				tmp->setFillColor(mud);
 			} else if(currentColor == grass)
 			{
-				terrain[i][j] = grassDifficulty;
+				hexDatTmp->terrain = grassDifficulty;
 				tmp->setFillColor(grass);
 			} else if(currentColor == street)
 			{
-				terrain[i][j] = streetDifficulty;
+				hexDatTmp->terrain = streetDifficulty;
 				tmp->setFillColor(street);
 			} else
 			{
-				terrain[i][j] = notfoundDifficulty;
+				hexDatTmp->terrain = notfoundDifficulty;
 				tmp->setFillColor(notfoundColor);
 			}
-			
-			shapes[i][j] = tmp;
+
+			hexDatTmp->hex = tmp;
+			hexDatTmp->index.x = i;
+			hexDatTmp->index.y = j;
+			shapes[i][j] = hexDatTmp;
 
 			offsetX += sizes.width() * 3.0f / 4.0f + outlineThickness / 2.0f;
 
@@ -195,7 +235,6 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 
 		offsetX = initialOffsetX;
 		offsetY = initialOffsetY + (i + 1) * (sizes.height() + outlineThickness);
-
 	}
 
 }

@@ -43,3 +43,16 @@ void Agent::DebugRender(sf::RenderWindow* window)
 {
 
 }
+
+void Agent::HandleKeyboard(sf::Keyboard::Key key)
+{
+
+}
+
+void Agent::HandleMouse(sf::Mouse::Button mb)
+{
+}
+
+void Agent::HandleMouse(sf::Vector2f& mousePosition)
+{
+}

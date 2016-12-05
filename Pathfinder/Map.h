@@ -4,6 +4,7 @@
 #include "Hexagon.h"
 #include "Renderable.h"
 #include "Interactive.h"
+#include <deque>
 
 class Map : public Renderable, public Interactive
 {
@@ -14,8 +15,10 @@ public:
 	void Render(sf::RenderWindow* window) override;
 	void DebugRender(sf::RenderWindow* window) override;
 	void HandleKeyboard(sf::Keyboard::Key key) override;
-	void HandleMouse(sf::Mouse::Button mb, sf::Vector2f& mousePosition) override;
-
+	void HandleMouse(sf::Mouse::Button mb) override;
+	void HandleMouse(sf::Vector2f& mousePosition) override;
+	std::vector<std::vector<HexData*>>* GetMapPtr();
+	HexData* GetSelectedHex() const;
 	float GetHexSize() const;
 	sf::Vector2f GetPositionByIndex(int x, int y);
 	sf::Vector2f GetPositionByIndex(sf::Vector2i posIndex);
@@ -26,9 +29,14 @@ private:
 	void SetCurrentHex(const sf::Vector2f& mousePos);
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
 	void DebugRenderText(sf::RenderWindow *window);
-	std::vector<HexData*> GetNeighbors(HexData* current);
 
-	std::vector<std::vector<HexData*>> shapes;
+	static std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap);
+	static void CheckNeighbors(HexData* currentHex, std::vector<std::vector<HexData*>> &usedMap, std::deque<HexData*> &toDo, std::vector<HexData*> &finished);
+	static std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
+	static int GetDifficulty(HexData* HexToTest);
+
+	static bool lowerCost(HexData *h1, HexData *h2);
+	std::vector<std::vector<HexData*>> hexMap;
 	HexData* selectedHexDat = nullptr;
 	
 	int rows, columns;
@@ -51,4 +59,5 @@ private:
 
 	sf::Text debugText;
 	sf::Font debugFont;
+	std::vector<HexData*> debugPath;
 };

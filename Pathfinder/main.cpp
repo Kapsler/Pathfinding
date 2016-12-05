@@ -58,13 +58,21 @@ int main()
 				}
 			}
 
-			if(event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseMoved)
+			if(event.type == sf::Event::MouseMoved)
 			{
 				sf::Vector2f mpos = window->mapPixelToCoords(sf::Mouse::getPosition(*window));
 
 				for (const auto i : toInteract)
 				{
-					i->HandleMouse(event.mouseButton.button, mpos);
+					i->HandleMouse(mpos);
+				}
+			}
+			
+			if(event.type == sf::Event::MouseButtonPressed)
+			{
+				for (const auto i : toInteract)
+				{
+					i->HandleMouse(event.mouseButton.button);
 				}
 			}
 

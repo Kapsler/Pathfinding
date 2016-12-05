@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="Agent.h" />
     <ClInclude Include="HexData.h" />
+    <ClInclude Include="HexPath.h" />
     <ClInclude Include="Interactive.h" />
     <ClInclude Include="Moving.h" />
     <ClInclude Include="Renderable.h" />

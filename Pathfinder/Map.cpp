@@ -1,4 +1,8 @@
 #include "Map.h"
+#include <deque>
+#include <iostream>
+#include <algorithm>
+#include <unordered_map>
 
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
@@ -14,7 +18,7 @@ Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 
 Map::~Map()
 {
-	for(auto line : shapes)
+	for(auto line : hexMap)
 	{
 		for (auto hex : line)
 		{
@@ -26,7 +30,7 @@ Map::~Map()
 void Map::Render(sf::RenderWindow* window)
 {
 	
-	for(const auto line : shapes)
+	for(const auto line : hexMap)
 	{
 		for(const auto hexdat : line)
 		{
@@ -47,8 +51,8 @@ void Map::DebugRender(sf::RenderWindow* window)
 	if (selectedHexDat != nullptr)
 	{
 		Hexagon drawSelected;
-		
-		for(auto hexdat : GetNeighbors(selectedHexDat))
+
+		for(auto hexdat : GetNeighbors(selectedHexDat, hexMap))
 		{
 			drawSelected = *hexdat->hex;
 			drawSelected.setOutlineColor(sf::Color::Cyan);
@@ -58,7 +62,16 @@ void Map::DebugRender(sf::RenderWindow* window)
 		drawSelected = *selectedHexDat->hex;
 		drawSelected.setOutlineColor(sf::Color::Red);
 		window->draw(drawSelected);
+
+
+		for (auto hexdat : debugPath)
+		{
+			drawSelected = *hexdat->hex;
+			drawSelected.setFillColor(sf::Color::Blue);
+			window->draw(drawSelected);
+		}
 	}
+
 
 	//DebugRenderText(window);
 }
@@ -67,7 +80,7 @@ void Map::DebugRenderText(sf::RenderWindow* window)
 {
 	//DebugText - Render Indices on Hexes
 
-	for (const auto line : shapes)
+	for (const auto line : hexMap)
 	{
 		for (const auto hexdat : line)
 		{
@@ -79,7 +92,7 @@ void Map::DebugRenderText(sf::RenderWindow* window)
 	}
 }
 
-std::vector<HexData*> Map::GetNeighbors(HexData* current)
+std::vector<HexData*> Map::GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap)
 {
 	std::vector<HexData*> neighbors;
 
@@ -94,13 +107,77 @@ std::vector<HexData*> Map::GetNeighbors(HexData* current)
 		auto xindex = current->index.x + offsets[i].x;
 		auto yindex = current->index.y + offsets[i].y;
 
-		if (xindex >= 0 && xindex < rows && yindex >= 0 && yindex < columns)
+		if (xindex >= 0 && xindex < usedMap.size() && yindex >= 0 && yindex < usedMap[0].size())
 		{
-			neighbors.push_back(shapes[xindex][yindex]);
+			neighbors.push_back(usedMap[xindex][yindex]);
 		}
 	}
 
 	return neighbors;
+}
+
+std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap)
+{
+	//std::cout << "Searching Path!" << std::endl;
+	//Breadth Search
+	std::vector<HexData*> foundPath, finished;
+	std::deque<HexData*> toDo;
+	std::unordered_map<HexData*, HexData*> cameFrom;
+
+	toDo.push_back(start);
+	cameFrom.insert_or_assign(start, nullptr);
+
+	HexData* currentHex;
+
+	while (!toDo.empty())
+	{
+		currentHex = *toDo.begin();
+		toDo.pop_front();
+
+		if(currentHex == target)
+		{
+			break;
+		}
+
+		for (HexData* neighbor : GetNeighbors(currentHex, usedMap))
+		{
+			if (cameFrom.find(neighbor) != cameFrom.end())
+			{
+			}
+			else
+			{
+				toDo.push_back(neighbor);
+				cameFrom.insert_or_assign(neighbor, currentHex);
+			}
+		}
+	}
+
+	currentHex = target;
+	foundPath.push_back(currentHex);
+
+	while(currentHex != start)
+	{
+		currentHex = cameFrom.at(currentHex);
+		foundPath.push_back(currentHex);
+	}
+
+	//std::cout << "Found Path! Size: " << foundPath.size() << std::endl;
+	return foundPath;
+}
+
+void Map::CheckNeighbors(HexData* currentHex, std::vector<std::vector<HexData*>>& usedMap, std::deque<HexData*> &toDo, std::vector<HexData*> &finished)
+{
+	
+}
+
+int Map::GetDifficulty(HexData* HexToTest)
+{
+	return HexToTest->terrain;
+}
+
+bool Map::lowerCost(HexData *h1, HexData *h2)
+{
+	return h1->terrain < h2->terrain;
 }
 
 void Map::HandleKeyboard(sf::Keyboard::Key key)
@@ -108,12 +185,30 @@ void Map::HandleKeyboard(sf::Keyboard::Key key)
 
 }
 
-void Map::HandleMouse(sf::Mouse::Button mb, sf::Vector2f& mousePosition)
+void Map::HandleMouse(sf::Vector2f& mousePosition)
 {
 	sf::Vector2f mousePos = sf::Vector2f(mousePosition);
 
 	SetCurrentHex(mousePos);
 
+}
+
+void Map::HandleMouse(sf::Mouse::Button mb)
+{
+	if (mb == sf::Mouse::Left)
+	{
+		debugPath = AStarPath(hexMap[0][0], selectedHexDat, *GetMapPtr());
+	}
+}
+
+std::vector<std::vector<HexData*>>* Map::GetMapPtr()
+{
+	return &hexMap;
+}
+
+HexData* Map::GetSelectedHex() const
+{
+	return selectedHexDat;
 }
 
 float Map::GetHexSize() const
@@ -123,12 +218,12 @@ float Map::GetHexSize() const
 
 sf::Vector2f Map::GetPositionByIndex(int x, int y)
 {
-	return shapes[x][y]->hex->getPosition();
+	return hexMap[x][y]->hex->getPosition();
 }
 
 sf::Vector2f Map::GetPositionByIndex(sf::Vector2i posIndex)
 {
-	return shapes[posIndex.x][posIndex.y]->hex->getPosition();
+	return hexMap[posIndex.x][posIndex.y]->hex->getPosition();
 }
 
 float Map::distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2)
@@ -141,7 +236,7 @@ void Map::SetCurrentHex(const sf::Vector2f& mousePos)
 	float closestDist = std::numeric_limits<float>::max();
 	float dist;
 
-	for (const auto line : shapes)
+	for (const auto line : hexMap)
 	{
 		for (const auto hexdat : line)
 		{
@@ -184,11 +279,11 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 	float offsetX = initialOffsetX;
 	float offsetY = initialOffsetY;
 
-	shapes.resize(rows);
+	hexMap.resize(rows);
 
 	for (int i = 0; i < rows; ++i)
 	{
-		shapes[i].resize(columns);
+		hexMap[i].resize(columns);
 
 		for (int j = 0; j < columns; ++j)
 		{
@@ -230,7 +325,7 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 			hexDatTmp->hex = tmp;
 			hexDatTmp->index.x = i;
 			hexDatTmp->index.y = j;
-			shapes[i][j] = hexDatTmp;
+			hexMap[i][j] = hexDatTmp;
 
 			offsetX += sizes.width() * 3.0f / 4.0f + outlineThickness / 2.0f;
 

@@ -31,7 +31,11 @@ Agent::~Agent()
 
 void Agent::Move()
 {
+	HexData* nextHex = GetNextField();
 
+	positionIndex = nextHex->index;
+	position = nextHex->hex->getPosition();
+	sprite.setPosition(position);
 }
 
 void Agent::Render(sf::RenderWindow* window)
@@ -44,15 +48,33 @@ void Agent::DebugRender(sf::RenderWindow* window)
 
 }
 
-void Agent::HandleKeyboard(sf::Keyboard::Key key)
+HexData* Agent::GetNextField()
 {
+	pathToFollow.clear();
 
+	if (wayPoints.size() > 0)
+	{
+		HexData* target = wayPoints[targetindex%wayPoints.size()];
+
+		pathToFollow = Map::AStarPath((*map->GetMapPtr())[positionIndex.x][positionIndex.y], target, *map->GetMapPtr());
+
+		if (pathToFollow.size() > 1)
+		{
+			HexData* nextField = pathToFollow[1];
+
+			if (nextField->index == target->index)
+			{
+				targetindex++;
+			}
+
+			return nextField;
+		}
+	} 
+
+	return map->GetHexDatByIndex(positionIndex.x, positionIndex.y);
 }
 
-void Agent::HandleMouse(sf::Mouse::Button mb)
+void Agent::SetWayPoints(std::vector<HexData*> otherWayPoints)
 {
-}
-
-void Agent::HandleMouse(sf::Vector2f& mousePosition)
-{
+	wayPoints = otherWayPoints;
 }

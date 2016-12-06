@@ -3,7 +3,7 @@
 #include "Renderable.h"
 #include "Moving.h"
 
-class Agent : public Renderable, public Moving, public Interactive
+class Agent : public Renderable, public Moving
 {
 public:
 	Agent(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr);
@@ -13,14 +13,20 @@ public:
 	void Render(sf::RenderWindow* window) override;
 	void DebugRender(sf::RenderWindow* window) override;
 
-	void HandleKeyboard(sf::Keyboard::Key key) override;
-	void HandleMouse(sf::Mouse::Button mb) override;
-	void HandleMouse(sf::Vector2f& mousePosition) override;
-private:
+	virtual HexData* GetNextField();
+	void SetWayPoints(std::vector<HexData*> otherWayPoints);
+
+protected:
 	sf::Vector2i positionIndex;
 	sf::Vector2f position;
 
 	sf::Sprite sprite;
 
 	Map* map;
+
+	std::vector<HexData*> pathToFollow;
+
+private:
+	std::vector<HexData*> wayPoints;
+	int targetindex = 0;
 };

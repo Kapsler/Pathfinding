@@ -21,6 +21,9 @@ public:
 	float GetHexSize() const;
 	sf::Vector2f GetPositionByIndex(int x, int y);
 	sf::Vector2f GetPositionByIndex(sf::Vector2i posIndex);
+	HexData* GetHexDatByIndex(int x, int y);
+
+	static std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap);
 
 private:
 	void GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage);
@@ -29,7 +32,6 @@ private:
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
 	void DebugRenderText(sf::RenderWindow *window);
 
-	static std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap);
 	static void CheckNeighbors(HexData* currentHex, std::vector<std::vector<HexData*>> &usedMap, std::deque<HexData*> &toDo, std::vector<HexData*> &finished);
 	static std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 	static int GetDifficulty(HexData* HexToTest);
@@ -47,7 +49,7 @@ private:
 	sf::Color street = sf::Color(130, 130, 130);
 	sf::Color notfoundColor = sf::Color::Magenta;
 
-	int unpassable = 100;
+	static const int unpassable = 1000;
 	int waterDifficulty = 1000;
 	int sandDifficulty = 5;
 	int mudDifficulty = 3;

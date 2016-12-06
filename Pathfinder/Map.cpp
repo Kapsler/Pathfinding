@@ -2,6 +2,7 @@
 #include <deque>
 #include <unordered_map>
 #include <memory>
+#include <iostream>
 
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
@@ -40,14 +41,14 @@ void Map::Render(sf::RenderWindow* window)
 	if (selectedHexDat != nullptr)
 	{
 		Hexagon drawSelected = *selectedHexDat->hex;
-		drawSelected.setOutlineColor(sf::Color::Red);
+		drawSelected.setOutlineColor(sf::Color::Cyan);
 		window->draw(drawSelected);
 	}
 }
 
 void Map::DebugRender(sf::RenderWindow* window)
 {
-	if (selectedHexDat != nullptr)
+	/*if (selectedHexDat != nullptr)
 	{
 		Hexagon drawSelected;
 
@@ -69,7 +70,7 @@ void Map::DebugRender(sf::RenderWindow* window)
 			drawSelected.setFillColor(sf::Color(255,0,255,255));
 			window->draw(drawSelected);
 		}
-	}
+	}*/
 
 
 	//DebugRenderText(window);
@@ -118,11 +119,18 @@ std::vector<HexData*> Map::GetNeighbors(HexData* current, std::vector<std::vecto
 std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap)
 {
 	//Breadth Search
+	std::vector<HexData*> foundPath;
 	std::unordered_map<HexData*, HexData*> cameFrom;
 	std::unordered_map<HexData*, int> costsSoFar;
-	std::map<float, HexData*> priorityToDo;
+	std::multimap<float, HexData*> priorityToDo;
 
-	priorityToDo.insert_or_assign(0.0f, start);
+	if(target->terrain >= unpassable)
+	{
+		std::cout << "Target is unpassable!" << std::endl;
+		return foundPath;
+	}
+
+	priorityToDo.insert(std::pair<float, HexData*>(0.0f, start));
 	cameFrom.insert_or_assign(start, nullptr);
 	costsSoFar.insert_or_assign(start, 0);
 
@@ -131,7 +139,7 @@ std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vecto
 	while (!priorityToDo.empty())
 	{
 	currentHex = priorityToDo.begin()->second;
-	priorityToDo.erase(priorityToDo.begin()->first);
+	priorityToDo.erase(priorityToDo.begin());
 	
 		if(currentHex == target)
 		{
@@ -140,20 +148,25 @@ std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vecto
 	
 		for (HexData* neighbor : GetNeighbors(currentHex, usedMap))
 		{
-			int newCosts = costsSoFar[currentHex] + GetDifficulty(neighbor);
+			int difficulty = GetDifficulty(neighbor);
+			if(difficulty >= unpassable)
+			{
+				costsSoFar.insert_or_assign(neighbor, unpassable);
+			}
+			int newCosts = costsSoFar[currentHex] + difficulty;
+			
 
 			if (costsSoFar.find(neighbor) == costsSoFar.end() || newCosts < costsSoFar.at(neighbor))
 			{
 				costsSoFar.insert_or_assign(neighbor, newCosts);
-				float priority = newCosts + distanceBetweenFloatPoints(target->hex->getPosition(), neighbor->hex->getPosition());
-				priorityToDo.insert_or_assign(priority, neighbor);
+				float priority = newCosts;
+				priorityToDo.insert(std::pair<float, HexData*>(priority, neighbor));
 				cameFrom.insert_or_assign(neighbor, currentHex);
 			}
 		}
 	}
 
 	//Build Path
-	std::vector<HexData*> foundPath;
 	currentHex = target;
 	foundPath.push_back(currentHex);
 
@@ -162,6 +175,8 @@ std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vecto
 		currentHex = cameFrom.at(currentHex);
 		foundPath.push_back(currentHex);
 	}
+
+	std::reverse(foundPath.begin(), foundPath.end());
 
 	//Adds all tested nodes to path
 	//for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
@@ -198,15 +213,15 @@ void Map::HandleMouse(sf::Vector2f& mousePosition)
 	sf::Vector2f mousePos = sf::Vector2f(mousePosition);
 
 	SetCurrentHex(mousePos);
-
+	
 }
 
 void Map::HandleMouse(sf::Mouse::Button mb)
 {
-	if (mb == sf::Mouse::Left)
-	{
-		debugPath = AStarPath(hexMap[0][0], selectedHexDat, *GetMapPtr());
-	}
+	//if (mb == sf::Mouse::Left)
+	//{
+	//	debugPath = AStarPath(hexMap[0][0], selectedHexDat, *GetMapPtr());
+	//}
 }
 
 std::vector<std::vector<HexData*>>* Map::GetMapPtr()
@@ -232,6 +247,11 @@ sf::Vector2f Map::GetPositionByIndex(int x, int y)
 sf::Vector2f Map::GetPositionByIndex(sf::Vector2i posIndex)
 {
 	return hexMap[posIndex.x][posIndex.y]->hex->getPosition();
+}
+
+HexData* Map::GetHexDatByIndex(int x, int y)
+{
+	return hexMap[x][y];
 }
 
 float Map::distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2)
@@ -301,6 +321,7 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 			tmp->setOutlineColor(sf::Color::Blue);
 			tmp->setOutlineThickness(outlineThickness);
 			tmp->setPosition(offsetX, offsetY);
+
 
 			sf::Color currentColor = mapImage.getPixel(j, i);
 

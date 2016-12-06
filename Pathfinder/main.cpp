@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Moving.h"
 #include "Agent.h"
+#include "Player.h"
 
 const float screenWidth = 1050.0f;
 const float screenHeight = 1200.0f;
@@ -22,13 +23,20 @@ int main()
 	toRender.push_back(map);
 	toInteract.push_back(map);
 
-	/*Agent* player = new Agent("./Assets/panda.png", sf::Vector2i(0, 0), map);
+	Player* player = new Player("./Assets/panda.png", sf::Vector2i(0, 0), map);
 	toRender.push_back(player);
 	toMove.push_back(player);
+	toInteract.push_back(player);
 
 	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(2, 2), map);
 	toRender.push_back(enemy);
-	toMove.push_back(enemy);*/
+	toMove.push_back(enemy);
+	{
+		std::vector<HexData*> path;
+		path.push_back(map->GetHexDatByIndex(0, 0));
+		path.push_back(map->GetHexDatByIndex(2, 2));
+		enemy->SetWayPoints(path);
+	}
 
 	sf::Clock fpsClock, moveClock;
 	float totalMoveTime = 0;

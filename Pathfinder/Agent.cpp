@@ -33,6 +33,7 @@ void Agent::Move()
 {
 	HexData* nextHex = GetNextField();
 
+	RotateStencil(nextHex);
 	positionIndex = nextHex->index;
 	position = nextHex->hex->getPosition();
 	sprite.setPosition(position);
@@ -58,6 +59,16 @@ void Agent::SetThreatStencil(ThreatStencil* ostencil)
 	stencil = ostencil;
 }
 
+void Agent::RotateStencil(HexData* target)
+{
+	stencil->RotateToTarget(GetCurrentHex(), target);
+}
+
+HexData* Agent::GetCurrentHex() const
+{
+	return map->GetHexDatByIndex(GetPositionIndex().x, GetPositionIndex().y);
+}
+
 sf::Vector2i Agent::GetPositionIndex() const
 {
 	return positionIndex;
@@ -71,7 +82,7 @@ HexData* Agent::GetNextField()
 	{
 		HexData* target = wayPoints[targetindex%wayPoints.size()];
 
-		pathToFollow = map->AStarPath((*map->GetMapPtr())[positionIndex.x][positionIndex.y], target, *map->GetMapPtr());
+		pathToFollow = map->AStarPath((*map->GetMapPtr())[positionIndex.x][positionIndex.y], target, *map->GetMapPtr(), this);
 
 		if (pathToFollow.size() > 1)
 		{

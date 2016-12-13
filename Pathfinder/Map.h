@@ -26,15 +26,15 @@ public:
 	sf::Vector2f GetPositionByIndex(sf::Vector2i posIndex);
 	HexData* GetHexDatByIndex(int x, int y);
 	void AddThreat(Agent* threat);
+	void ResetThreat(Agent* toIgnore);
 
-	std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap);
+	std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore);
 
 private:
 	void GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage);
 	static float distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2);
 	void SetCurrentHex(const sf::Vector2f& mousePos);
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
-	void ResetThreat();
 	void DebugRenderIndices(sf::RenderWindow *window);
 	void DebugRenderThreat(sf::RenderWindow *window);
 	void DebugRenderDifficulty(sf::RenderWindow *window);
@@ -44,8 +44,6 @@ private:
 
 	std::vector<std::vector<HexData*>> hexMap;
 	HexData* selectedHexDat = nullptr;
-	
-
 
 	int rows, columns;
 	float hexsize;

@@ -30,7 +30,7 @@ Map::~Map()
 
 void Map::Render(sf::RenderWindow* window)
 {
-	ResetThreat();
+	ResetThreat(nullptr);
 
 	sf::Color r = sf::Color::Red;
 
@@ -43,7 +43,7 @@ void Map::Render(sf::RenderWindow* window)
 			if(hexdat->threat > 0)
 			{
 				Hexagon threatHex = *hexdat->hex;
-				r.a = 50 * hexdat->threat;
+				r.a = (255.0f / 10.0f) * hexdat->threat;
 				threatHex.setFillColor(r);
 				threatHex.setOutlineColor(sf::Color::Red);
 				window->draw(threatHex);
@@ -173,10 +173,9 @@ std::vector<HexData*> Map::GetNeighbors(HexData* current, std::vector<std::vecto
 	return neighbors;
 }
 
-std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap)
+std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore)
 {
-
-	ResetThreat();
+	ResetThreat(toIgnore);
 
 	//Breadth Search
 	std::vector<HexData*> foundPath;
@@ -332,7 +331,7 @@ void Map::AddThreat(Agent* threat)
 	threats.push_back(threat);
 }
 
-void Map::ResetThreat()
+void Map::ResetThreat(Agent* toIgnore)
 {
 	for(auto l : hexMap)
 	{
@@ -344,8 +343,11 @@ void Map::ResetThreat()
 
 	for(auto t : threats)
 	{
-		t->GetThreatStencil()->SetThreats(t->GetPositionIndex(), *GetMapPtr());
-		hexMap[t->GetPositionIndex().x][t->GetPositionIndex().y]->threat += unpassable;
+		if(t != toIgnore)
+		{
+			t->GetThreatStencil()->SetThreats(t->GetPositionIndex(), *GetMapPtr());
+			hexMap[t->GetPositionIndex().x][t->GetPositionIndex().y]->threat += unpassable;
+		}
 	}
 		
 }

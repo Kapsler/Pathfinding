@@ -15,6 +15,8 @@ public:
 	void DebugRender(sf::RenderWindow* window) override;
 	ThreatStencil* GetThreatStencil() const;
 	void SetThreatStencil(ThreatStencil* ostencil);
+	void RotateStencil(HexData* target);
+	HexData* GetCurrentHex() const;
 
 	sf::Vector2i GetPositionIndex() const;
 

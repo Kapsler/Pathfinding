@@ -20,9 +20,17 @@ struct CubeCoords
 		z = iz;
 	}
 
+	CubeCoords(const CubeCoords& other)
+	{
+		x = other.x;
+		y = other.y;
+		z = other.z;
+	}
+
 	CubeCoords operator+ (const CubeCoords& r) const
 	{
 		CubeCoords ret;
+
 		ret.x = this->x + r.x;
 		ret.y = this->y + r.y;
 		ret.z = this->z + r.z;
@@ -36,5 +44,11 @@ struct CubeCoords
 		this->y += r.y;
 		this->z += r.z;
 		return *this;
+	}
+
+	bool operator!= (const CubeCoords& r) const
+	{
+		return !(this->x == r.x && this->y == r.y && this->z == r.z);
+
 	}
 };

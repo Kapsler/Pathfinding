@@ -24,13 +24,6 @@ int main()
 	toRender.push_back(map);
 	toInteract.push_back(map);
 
-	Player* player = new Player("./Assets/panda.png", sf::Vector2i(0, 0), map);
-	player->SetThreatStencil(new ThreatStencil());
-	toRender.push_back(player);
-	toMove.push_back(player);
-	toInteract.push_back(player);
-	map->AddThreat(player);
-
 	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(9, 12), map);
 	enemy->SetThreatStencil(new RadialStencil());
 	toRender.push_back(enemy);
@@ -54,6 +47,13 @@ int main()
 		path.push_back(map->GetHexDatByIndex(7, 27));
 		enemy->SetWayPoints(path);
 	}
+
+	Player* player = new Player("./Assets/panda.png", sf::Vector2i(0, 0), map);
+	player->SetThreatStencil(new ThreatStencil());
+	toRender.push_back(player);
+	toMove.push_back(player);
+	toInteract.push_back(player);
+	map->AddThreat(player);
 
 	sf::Clock fpsClock, moveClock;
 	float totalMoveTime = 0;
@@ -105,7 +105,7 @@ int main()
 
 		totalMoveTime += moveClock.restart().asSeconds();
 
-		if(totalMoveTime > 0.2f)
+		if(totalMoveTime > 10.0f)
 		{
 			float fps = 1.0f / (currentFpsTime);
 			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");

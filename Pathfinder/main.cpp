@@ -105,7 +105,7 @@ int main()
 
 		totalMoveTime += moveClock.restart().asSeconds();
 
-		if(totalMoveTime > 10.0f)
+		if(totalMoveTime > 0.3f)
 		{
 			float fps = 1.0f / (currentFpsTime);
 			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");

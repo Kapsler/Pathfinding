@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
+    <ClCompile Include="FieldOfViewStencil.cpp" />
     <ClCompile Include="Hexagon.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -162,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="Agent.h" />
     <ClInclude Include="CubeCoords.h" />
+    <ClInclude Include="FieldOfViewStencil.h" />
     <ClInclude Include="HexData.h" />
     <ClInclude Include="Interactive.h" />
     <ClInclude Include="Moving.h" />

@@ -6,6 +6,7 @@
 #include "Agent.h"
 #include "Player.h"
 #include "RadialStencil.h"
+#include "FieldOfViewStencil.h"
 
 const float screenWidth = 1050.0f;
 const float screenHeight = 1200.0f;
@@ -25,7 +26,7 @@ int main()
 	toInteract.push_back(map);
 
 	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(9, 12), map);
-	enemy->SetThreatStencil(new RadialStencil());
+	enemy->SetThreatStencil(new FieldOfViewStencil());
 	toRender.push_back(enemy);
 	toMove.push_back(enemy);
 	map->AddThreat(enemy);
@@ -105,7 +106,7 @@ int main()
 
 		totalMoveTime += moveClock.restart().asSeconds();
 
-		if(totalMoveTime > 0.3f)
+		if(totalMoveTime > 0.20f)
 		{
 			float fps = 1.0f / (currentFpsTime);
 			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");

@@ -5,6 +5,7 @@
 #include "Moving.h"
 #include "Agent.h"
 #include "Player.h"
+#include "RadialStencil.h"
 
 const float screenWidth = 1050.0f;
 const float screenHeight = 1200.0f;
@@ -19,18 +20,22 @@ int main()
 	window = new sf::RenderWindow(sf::VideoMode(static_cast<unsigned int>(screenWidth), static_cast<unsigned int>(screenHeight)), "Pathfinding");
 	window->setVerticalSyncEnabled(true);
 
-	Map* map = new Map(screenWidth, screenHeight, "./Assets/terrain23.png");
+	Map* map = new Map(screenWidth, screenHeight, "./Assets/terrain30.png");
 	toRender.push_back(map);
 	toInteract.push_back(map);
 
 	Player* player = new Player("./Assets/panda.png", sf::Vector2i(0, 0), map);
+	player->SetThreatStencil(new ThreatStencil());
 	toRender.push_back(player);
 	toMove.push_back(player);
 	toInteract.push_back(player);
+	map->AddThreat(player);
 
 	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(2, 2), map);
+	enemy->SetThreatStencil(new RadialStencil());
 	toRender.push_back(enemy);
 	toMove.push_back(enemy);
+	map->AddThreat(enemy);
 	{
 		std::vector<HexData*> path;
 		path.push_back(map->GetHexDatByIndex(0, 0));
@@ -88,7 +93,7 @@ int main()
 
 		totalMoveTime += moveClock.restart().asSeconds();
 
-		if(totalMoveTime > 1.0f)
+		if(totalMoveTime > 0.5f)
 		{
 			float fps = 1.0f / (currentFpsTime);
 			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");

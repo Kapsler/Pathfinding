@@ -49,7 +49,7 @@ HexData* Player::GetNextField()
 	if (target != nullptr)
 	{
 
-		pathToFollow = Map::AStarPath(map->GetHexDatByIndex(positionIndex.x, positionIndex.y), target, *map->GetMapPtr());
+		pathToFollow = map->AStarPath(map->GetHexDatByIndex(positionIndex.x, positionIndex.y), target, *map->GetMapPtr());
 
 		if(pathToFollow.size() > 1)
 		{

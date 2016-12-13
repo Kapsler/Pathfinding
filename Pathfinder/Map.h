@@ -4,6 +4,9 @@
 #include "Renderable.h"
 #include "Interactive.h"
 #include <deque>
+#include "ThreatStencil.h"
+
+class Agent;
 
 class Map : public Renderable, public Interactive
 {
@@ -22,25 +25,30 @@ public:
 	sf::Vector2f GetPositionByIndex(int x, int y);
 	sf::Vector2f GetPositionByIndex(sf::Vector2i posIndex);
 	HexData* GetHexDatByIndex(int x, int y);
+	void AddThreat(Agent* threat);
 
-	static std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap);
+	std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap);
 
 private:
 	void GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage);
 	static float distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2);
 	void SetCurrentHex(const sf::Vector2f& mousePos);
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
+	void ResetThreat();
 	void DebugRenderText(sf::RenderWindow *window);
 
-	static void CheckNeighbors(HexData* currentHex, std::vector<std::vector<HexData*>> &usedMap, std::deque<HexData*> &toDo, std::vector<HexData*> &finished);
-	static std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
-	static int GetDifficulty(HexData* HexToTest);
+	std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
+	int GetDifficulty(HexData* HexToTest);
 
 	std::vector<std::vector<HexData*>> hexMap;
 	HexData* selectedHexDat = nullptr;
 	
+
+
 	int rows, columns;
 	float hexsize;
+
+	std::vector<Agent*> threats;
 
 	sf::Color water = sf::Color(60, 180, 255);
 	sf::Color sand = sf::Color(200, 180, 70);

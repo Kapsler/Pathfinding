@@ -26,7 +26,7 @@ Agent::Agent(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr
 
 Agent::~Agent()
 {
-
+	
 }
 
 void Agent::Move()
@@ -48,6 +48,21 @@ void Agent::DebugRender(sf::RenderWindow* window)
 
 }
 
+ThreatStencil* Agent::GetThreatStencil() const
+{
+	return stencil;
+}
+
+void Agent::SetThreatStencil(ThreatStencil* ostencil)
+{
+	stencil = ostencil;
+}
+
+sf::Vector2i Agent::GetPositionIndex() const
+{
+	return positionIndex;
+}
+
 HexData* Agent::GetNextField()
 {
 	pathToFollow.clear();
@@ -56,7 +71,7 @@ HexData* Agent::GetNextField()
 	{
 		HexData* target = wayPoints[targetindex%wayPoints.size()];
 
-		pathToFollow = Map::AStarPath((*map->GetMapPtr())[positionIndex.x][positionIndex.y], target, *map->GetMapPtr());
+		pathToFollow = map->AStarPath((*map->GetMapPtr())[positionIndex.x][positionIndex.y], target, *map->GetMapPtr());
 
 		if (pathToFollow.size() > 1)
 		{

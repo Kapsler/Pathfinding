@@ -6,4 +6,5 @@ struct HexData
 	Hexagon* hex;
 	sf::Vector2i index;
 	int terrain;
+	int threat;
 };

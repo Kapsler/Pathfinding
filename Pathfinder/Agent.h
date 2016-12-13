@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "Renderable.h"
 #include "Moving.h"
+#include "ThreatStencil.h"
 
 class Agent : public Renderable, public Moving
 {
@@ -12,6 +13,10 @@ public:
 	void Move() override;
 	void Render(sf::RenderWindow* window) override;
 	void DebugRender(sf::RenderWindow* window) override;
+	ThreatStencil* GetThreatStencil() const;
+	void SetThreatStencil(ThreatStencil* ostencil);
+
+	sf::Vector2i GetPositionIndex() const;
 
 	virtual HexData* GetNextField();
 	void SetWayPoints(std::vector<HexData*> otherWayPoints);
@@ -25,6 +30,7 @@ protected:
 	Map* map;
 
 	std::vector<HexData*> pathToFollow;
+	ThreatStencil* stencil = nullptr;
 
 private:
 	std::vector<HexData*> wayPoints;

@@ -17,4 +17,5 @@ public:
 	HexData* GetNextField() override;
 
 	HexData* target = nullptr;
+	std::vector<Agent*> threats;
 };

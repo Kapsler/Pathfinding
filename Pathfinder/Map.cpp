@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #include <iostream>
+#include "Agent.h"
 
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
@@ -29,12 +30,24 @@ Map::~Map()
 
 void Map::Render(sf::RenderWindow* window)
 {
-	
+	ResetThreat();
+
+	sf::Color r = sf::Color::Red;
+
 	for(const auto line : hexMap)
 	{
 		for(const auto hexdat : line)
 		{
 			window->draw(*(hexdat->hex));
+
+			if(hexdat->threat > 0)
+			{
+				Hexagon threatHex = *hexdat->hex;
+				r.a = 50 * hexdat->threat;
+				threatHex.setFillColor(r);
+				window->draw(threatHex);
+			}
+			
 		}
 	}
 
@@ -118,13 +131,16 @@ std::vector<HexData*> Map::GetNeighbors(HexData* current, std::vector<std::vecto
 
 std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap)
 {
+
+	ResetThreat();
+
 	//Breadth Search
 	std::vector<HexData*> foundPath;
 	std::unordered_map<HexData*, HexData*> cameFrom;
 	std::unordered_map<HexData*, int> costsSoFar;
 	std::multimap<float, HexData*> priorityToDo;
 
-	if(target->terrain >= unpassable)
+	if(GetDifficulty(target) >= unpassable)
 	{
 		std::cout << "Target is unpassable!" << std::endl;
 		return foundPath;
@@ -189,17 +205,13 @@ std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vecto
 	//}
 
 	//std::cout << "Found Path! Size: " << foundPath.size() << std::endl;
-	return foundPath;
-}
 
-void Map::CheckNeighbors(HexData* currentHex, std::vector<std::vector<HexData*>>& usedMap, std::deque<HexData*> &toDo, std::vector<HexData*> &finished)
-{
-	
+	return foundPath;
 }
 
 int Map::GetDifficulty(HexData* HexToTest)
 {
-	return HexToTest->terrain;
+	return HexToTest->terrain + HexToTest->threat;
 }
 
 
@@ -252,6 +264,29 @@ sf::Vector2f Map::GetPositionByIndex(sf::Vector2i posIndex)
 HexData* Map::GetHexDatByIndex(int x, int y)
 {
 	return hexMap[x][y];
+}
+
+void Map::AddThreat(Agent* threat)
+{
+	threats.push_back(threat);
+}
+
+void Map::ResetThreat()
+{
+	for(auto l : hexMap)
+	{
+		for(auto h : l)
+		{
+			h->threat = 0;
+		}
+	}
+
+	for(auto t : threats)
+	{
+		hexMap[t->GetPositionIndex().x][t->GetPositionIndex().y]->threat += unpassable;
+		t->GetThreatStencil()->SetThreats(t->GetPositionIndex(), *GetMapPtr());
+	}
+		
 }
 
 float Map::distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2)

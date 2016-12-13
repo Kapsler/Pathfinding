@@ -35,7 +35,9 @@ private:
 	void SetCurrentHex(const sf::Vector2f& mousePos);
 	void LoadMapFromImage(float screenWidth, float screenHeight, const std::string& filename);
 	void ResetThreat();
-	void DebugRenderText(sf::RenderWindow *window);
+	void DebugRenderIndices(sf::RenderWindow *window);
+	void DebugRenderThreat(sf::RenderWindow *window);
+	void DebugRenderDifficulty(sf::RenderWindow *window);
 
 	std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 	int GetDifficulty(HexData* HexToTest);
@@ -68,4 +70,8 @@ private:
 	sf::Text debugText;
 	sf::Font debugFont;
 	std::vector<HexData*> debugPath;
+
+	bool difficultyRenderFlag = false;
+	bool indicesRenderFlag = false;
+	bool threatRenderFlag = false;
 };

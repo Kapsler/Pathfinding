@@ -86,11 +86,22 @@ void Map::DebugRender(sf::RenderWindow* window)
 		}
 	}*/
 
-
-	//DebugRenderText(window);
+	if(indicesRenderFlag)
+	{
+		DebugRenderIndices(window);
+	}
+	if(difficultyRenderFlag)
+	{
+		DebugRenderDifficulty(window);
+	}
+	if(threatRenderFlag)
+	{
+		DebugRenderThreat(window);
+	}
+	
 }
 
-void Map::DebugRenderText(sf::RenderWindow* window)
+void Map::DebugRenderIndices(sf::RenderWindow* window)
 {
 	//DebugText - Render Indices on Hexes
 
@@ -100,6 +111,38 @@ void Map::DebugRenderText(sf::RenderWindow* window)
 		{
 			debugText.setPosition(hexdat->hex->getPosition());
 			debugText.setString(std::to_string(hexdat->index.x) + "," + std::to_string(hexdat->index.y));
+			debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
+			window->draw(debugText);
+		}
+	}
+}
+
+void Map::DebugRenderThreat(sf::RenderWindow* window)
+{
+	for (const auto line : hexMap)
+	{
+		for (const auto hexdat : line)
+		{
+			if(hexdat->threat > 0)
+			{
+				debugText.setPosition(hexdat->hex->getPosition());
+				debugText.setString(std::to_string(hexdat->threat));
+				debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
+				window->draw(debugText);
+			}
+			
+		}
+	}
+}
+
+void Map::DebugRenderDifficulty(sf::RenderWindow* window)
+{
+	for (const auto line : hexMap)
+	{
+		for (const auto hexdat : line)
+		{
+			debugText.setPosition(hexdat->hex->getPosition());
+			debugText.setString(std::to_string(GetDifficulty(hexdat)));
 			debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
 			window->draw(debugText);
 		}
@@ -218,6 +261,23 @@ int Map::GetDifficulty(HexData* HexToTest)
 
 void Map::HandleKeyboard(sf::Keyboard::Key key)
 {
+	difficultyRenderFlag = false;
+	indicesRenderFlag = false;
+	threatRenderFlag = false;
+
+	if(key == sf::Keyboard::Key::D)
+	{
+		difficultyRenderFlag = true;
+	} else if(key == sf::Keyboard::Key::T)
+	{
+		threatRenderFlag = true;
+	}
+	if(key == sf::Keyboard::Key::I)
+	{
+		indicesRenderFlag = true;
+	}
+
+
 
 }
 

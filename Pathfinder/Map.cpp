@@ -45,6 +45,7 @@ void Map::Render(sf::RenderWindow* window)
 				Hexagon threatHex = *hexdat->hex;
 				r.a = 50 * hexdat->threat;
 				threatHex.setFillColor(r);
+				threatHex.setOutlineColor(sf::Color::Red);
 				window->draw(threatHex);
 			}
 			
@@ -283,8 +284,8 @@ void Map::ResetThreat()
 
 	for(auto t : threats)
 	{
-		hexMap[t->GetPositionIndex().x][t->GetPositionIndex().y]->threat += unpassable;
 		t->GetThreatStencil()->SetThreats(t->GetPositionIndex(), *GetMapPtr());
+		hexMap[t->GetPositionIndex().x][t->GetPositionIndex().y]->threat += unpassable;
 	}
 		
 }

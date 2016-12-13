@@ -20,7 +20,7 @@ void Player::DebugRender(sf::RenderWindow* window)
 	for(auto h : pathToFollow)
 	{
 		drawHex = *h->hex;
-		drawHex.setOutlineColor(sf::Color::Red);
+		drawHex.setOutlineColor(sf::Color::Cyan);
 		drawHex.setFillColor(sf::Color::Transparent);
 		window->draw(drawHex);
 	}

@@ -7,7 +7,8 @@ class ThreatStencil
 {
 public:
 
-	static sf::Vector2i CubeToOffset(CubeCoords&);
+	static sf::Vector2i CubeToOffset(CubeCoords& cube);
+	static CubeCoords OffsetToCube(sf::Vector2i& off);
 	void SetThreats(sf::Vector2i origin, std::vector<std::vector<HexData*>>& usedMap);
 
 

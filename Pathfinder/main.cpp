@@ -31,15 +31,27 @@ int main()
 	toInteract.push_back(player);
 	map->AddThreat(player);
 
-	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(2, 2), map);
+	Agent* enemy = new Agent("./Assets/bear.png", sf::Vector2i(9, 12), map);
 	enemy->SetThreatStencil(new RadialStencil());
 	toRender.push_back(enemy);
 	toMove.push_back(enemy);
 	map->AddThreat(enemy);
 	{
 		std::vector<HexData*> path;
-		path.push_back(map->GetHexDatByIndex(0, 0));
-		path.push_back(map->GetHexDatByIndex(2, 2));
+		path.push_back(map->GetHexDatByIndex(19, 12));
+		path.push_back(map->GetHexDatByIndex(9, 12));
+		enemy->SetWayPoints(path);
+	}
+
+	enemy = new Agent("./Assets/bear.png", sf::Vector2i(7, 27), map);
+	enemy->SetThreatStencil(new RadialStencil());
+	toRender.push_back(enemy);
+	toMove.push_back(enemy);
+	map->AddThreat(enemy);
+	{
+		std::vector<HexData*> path;
+		path.push_back(map->GetHexDatByIndex(22, 20));
+		path.push_back(map->GetHexDatByIndex(7, 27));
 		enemy->SetWayPoints(path);
 	}
 
@@ -93,7 +105,7 @@ int main()
 
 		totalMoveTime += moveClock.restart().asSeconds();
 
-		if(totalMoveTime > 0.5f)
+		if(totalMoveTime > 0.2f)
 		{
 			float fps = 1.0f / (currentFpsTime);
 			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");

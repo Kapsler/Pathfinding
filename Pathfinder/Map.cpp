@@ -260,20 +260,23 @@ int Map::GetDifficulty(HexData* HexToTest)
 
 void Map::HandleKeyboard(sf::Keyboard::Key key)
 {
-	difficultyRenderFlag = false;
-	indicesRenderFlag = false;
-	threatRenderFlag = false;
 
 	if(key == sf::Keyboard::Key::D)
 	{
-		difficultyRenderFlag = true;
+		indicesRenderFlag = false;
+		threatRenderFlag = false;
+		difficultyRenderFlag = !difficultyRenderFlag;
 	} else if(key == sf::Keyboard::Key::T)
 	{
-		threatRenderFlag = true;
+		difficultyRenderFlag = false;
+		indicesRenderFlag = false;
+		threatRenderFlag = !threatRenderFlag;
 	}
 	if(key == sf::Keyboard::Key::I)
 	{
-		indicesRenderFlag = true;
+		difficultyRenderFlag = false;
+		threatRenderFlag = false;
+		indicesRenderFlag = !indicesRenderFlag;
 	}
 
 

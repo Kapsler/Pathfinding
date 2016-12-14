@@ -10,6 +10,7 @@
 
 const float screenWidth = 1050.0f;
 const float screenHeight = 1200.0f;
+bool movementFlag = true;
 sf::RenderWindow *window;
 	
 std::vector<Renderable*> toRender;
@@ -49,7 +50,7 @@ int main()
 		enemy->SetWayPoints(path);
 	}
 
-	Player* player = new Player("./Assets/panda.png", sf::Vector2i(0, 0), map);
+	Player* player = new Player("./Assets/panda.png", sf::Vector2i(15, 0), map);
 	player->SetThreatStencil(new ThreatStencil());
 	toRender.push_back(player);
 	toMove.push_back(player);
@@ -76,6 +77,10 @@ int main()
 				if(event.key.code == sf::Keyboard::Escape)
 				{
 					window->close();
+				}
+				if(event.key.code == sf::Keyboard::M)
+				{
+					movementFlag = !movementFlag;
 				}
 
 				for (const auto i : toInteract)
@@ -106,7 +111,7 @@ int main()
 
 		totalMoveTime += moveClock.restart().asSeconds();
 
-		if(totalMoveTime > 0.20f)
+		if(movementFlag && totalMoveTime > 0.20f)
 		{
 			float fps = 1.0f / (currentFpsTime);
 			window->setTitle("Pathfinding (" + std::to_string(static_cast<int>(fps)) + ")");

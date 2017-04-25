@@ -8,8 +8,8 @@
 #include "RadialStencil.h"
 #include "FieldOfViewStencil.h"
 
-const float screenWidth = 1050.0f;
-const float screenHeight = 1200.0f;
+const float screenWidth = 1050.0f*0.75f;
+const float screenHeight = 900.0f;
 bool movementFlag = true;
 sf::RenderWindow *window;
 	

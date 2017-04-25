@@ -278,9 +278,6 @@ void Map::HandleKeyboard(sf::Keyboard::Key key)
 		threatRenderFlag = false;
 		indicesRenderFlag = !indicesRenderFlag;
 	}
-
-
-
 }
 
 void Map::HandleMouse(sf::Vector2f& mousePosition)
